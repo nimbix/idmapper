@@ -1,10 +1,7 @@
 FROM python:2-alpine
 
-#VOLUME /home
-VOLUME /tmp
-
-RUN pip install utils db
-RUN pip install web.py
+RUN pip install --no-cache-dir utils db simplejson
+RUN pip install --no-cache-dir web.py
 
 COPY idmapper.py /usr/local/bin/idmapper.py
 CMD [ "python", "/usr/local/bin/idmapper.py" ]

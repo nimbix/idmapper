@@ -29,6 +29,7 @@
 #
 import web
 import os
+import simplejson as json
 
 urls = (
     '/map/(.*)', 'idmap'
@@ -54,11 +55,12 @@ class idmap:
 
         if os.path.exists(path):
             st = os.stat(path)
-            return {'uid': st.st_uid,
-                    'gid': st.st_gid,
-                    'home': os.path.dirname(path)}
+            return json.dumps(
+                {'uid': st.st_uid,
+                 'gid': st.st_gid,
+                 'home': os.path.dirname(path)})
         else:
-            return {}
+            return '{}'
 
     def __init__(self):
         ''' Constructor: stores configuration '''

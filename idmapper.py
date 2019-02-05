@@ -41,6 +41,11 @@ class idmap:
     ''' Provides the web service '''
     def GET(self, username):
         ''' Maps a username to an identity, if possible '''
+        if not username:
+
+            # assume it's a readiness probe and stop here
+            return 'OK'
+
         parts = username.split('@')
         domain = parts[1] if len(parts) > 1 else ''
         path = self.homepath.replace('%d', domain).replace(

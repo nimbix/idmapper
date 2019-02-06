@@ -44,7 +44,9 @@ Replace the `john` with the actual username or UPN to query other users; note th
 To deploy *idmapper* as a service for JARVICE in Kubernetes, either use the `jarvice-idmapper-nfs.yaml` file provided here as is (but see example below), or adapt to volume mount a home share appropriate for your site.  For a simple NFS setup you can deploy as follows:
 
 ```
-NFS_SERVER=192.168.10.1 NFS_PATH=/export/home envsubst < jarvice-idmapper-nfs.yaml |kubectl apply -n jarvice-system -f -
+NFS_SERVER=192.168.10.1 NFS_PATH=/export/home envsubst \
+    < jarvice-idmapper-nfs.yaml \
+    | kubectl apply -n jarvice-system -f -
 ```
 (Note: the GNU gettext runtime must be installed on your client for `envsubst(1)` portion to succeed)
 

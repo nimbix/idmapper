@@ -39,3 +39,14 @@ $ curl -s localhost:8080/map/john|jq
 ```
 Replace the `john` with the actual username or UPN to query other users; note that if the home directory matching the `${HOMEPATH}` pattern doesn't exist for that user, *idmapper* returns an empty JSON payload (`{}`)
 
+# Deploying in Kubernetes
+
+To deploy *idmapper* as a service for JARVICE in Kubernetes, either use the `jarvice-idmapper-nfs.yaml` file provided here as is (but see example below), or adapt to volume mount a home share appropriate for your site.  For a simple NFS setup you can deploy as follows:
+
+```
+NFS_SERVER=192.168.10.1 NFS_PATH=/export/home envsubst < jarvice-idmapper-nfs.yaml |kubectl apply -n jarvice-system -f -
+```
+(Note: the GNU gettext runtime must be installed on your client for `envsubst(1)` portion to succeed)
+
+Replace the values of `${NFS_SERVER}` and `${NFS_PATH}` with the appropriate values for your site, and the namespace where JARVICE services are deployed if different than `jarvice-system`.  Once deployed, JARVICE will automatically leverage the service to determine user identity when possible and to attach network-mounted home directories to compute jobs.  Note that it will use the `homes` volume described in the `volumes` section of the deployment spec as the basis for compute containers mounting this storage.
+

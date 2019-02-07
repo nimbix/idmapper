@@ -6,8 +6,8 @@ NAME=
 VERSION=$(date +%Y%m%d)
 RELEASE=1
 
+REGISTRY=
 REPO=nimbix
-REGISTRY=docker.io
 
 PUSH_LATEST=
 PUSH_MANIFEST=
@@ -29,10 +29,8 @@ Options:
                                 (default: $VERSION)
   --release <image-release>     Release number/string to use in the image tag
                                 (default: $RELEASE)
-  --repo <repository-name>      Repository to push to
-                                (default: $REPO)
   --registry <registry-name>    Registry to push to
-                                (default: $REGISTRY)
+  --repo <repository-name>      Specific registry repository to push to
   --push-latest                 Create and push "latest-$ARCH" image tag
   --push-manifest               Create and push multiarch manifest list
   --manifest-arches             Architectures to add to manifest list
@@ -58,12 +56,12 @@ while [ $# -gt 0 ]; do
             NAME=$2
             shift; shift;
             ;;
-        --repo)
-            REPO=$2
-            shift; shift;
-            ;;
         --registry)
             REGISTRY=$2
+            shift; shift;
+            ;;
+        --repo)
+            REPO=$2
             shift; shift;
             ;;
         --version)
@@ -99,7 +97,8 @@ done
 
 [ -z "$NAME" ] && print_usage && exit 1
 
-IMAGE_BASE=$REGISTRY/$REPO/$NAME
+IMAGE_BASE=$REPO/$NAME
+[ -n "$REGISTRY" ] && IMAGE_BASE=$REGISTRY/$IMAGE_BASE
 IMAGE_TAG=$VERSION-$RELEASE
 IMAGE_TAG_ARCH=$IMAGE_TAG-$ARCH
 

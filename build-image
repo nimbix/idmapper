@@ -6,7 +6,7 @@ NAME=
 VERSION=$(date +%Y%m%d)
 RELEASE=1
 
-REGISTRY=
+REGISTRY=docker.io
 REPO=nimbix
 
 PUSH_LATEST=

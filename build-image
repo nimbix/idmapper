@@ -40,10 +40,10 @@ Options:
                                 (default: $DOCKERFILE)
 
 Example (build image and create/push latest tag):
-\$ $0 --name idmapper --push-latest
+\$ $0 --name <image-name> --push-latest
 
 Example (build image and multiarch manifest, create/push latest tags):
-\$ $0 --name idmapper --push-manifest --push-latest
+\$ $0 --name <image-name> --push-latest --push-manifest
 EOF
 }
 

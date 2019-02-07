@@ -30,6 +30,7 @@ Options:
   --release <image-release>     Release number/string to use in the image tag
                                 (default: $RELEASE)
   --registry <registry-name>    Registry to push to
+                                (default: $REGISTRY)
   --repo <repository-name>      Specific registry repository to push to
   --push-latest                 Create and push "latest-$ARCH" image tag
   --push-manifest               Create and push multiarch manifest list

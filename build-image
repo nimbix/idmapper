@@ -1,0 +1,141 @@
+#!/bin/bash
+
+set -e
+
+NAME=
+VERSION=$(date +%Y%m%d)
+RELEASE=1
+
+REPO=nimbix
+REGISTRY=docker.io
+
+PUSH_LATEST=
+PUSH_MANIFEST=
+MANIFEST_ARCHES="amd64 ppc64le"
+
+DOCKERFILE=Dockerfile
+
+ARCH=$(arch)
+[ "$ARCH" = "x86_64" ] && ARCH=amd64
+
+function print_usage {
+    cat <<EOF
+Usage:
+  $0 --name <image-name> [options]
+
+Options:
+  --name <image-name>           Name of the image to build (required)
+  --version <image-version>     Version number/string to use in the image tag
+                                (default: $VERSION)
+  --release <image-release>     Release number/string to use in the image tag
+                                (default: $RELEASE)
+  --repo <repository-name>      Repository to push to
+                                (default: $REPO)
+  --registry <registry-name>    Registry to push to
+                                (default: $REGISTRY)
+  --push-latest                 Create and push "latest-$ARCH" image tag
+  --push-manifest               Create and push multiarch manifest list
+  --manifest-arches             Architectures to add to manifest list
+                                (default: "$MANIFEST_ARCHES")
+  --dockerfile                  Dockerfile to use for docker build
+                                (default: $DOCKERFILE)
+
+Example (build image and create/push latest tag):
+\$ $0 --name idmapper --push-latest
+
+Example (build image and multiarch manifest, create/push latest tags):
+\$ $0 --name idmapper --push-manifest --push-latest
+EOF
+}
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        --help)
+            echo_usage
+            exit 0
+            ;;
+        --name)
+            NAME=$2
+            shift; shift;
+            ;;
+        --repo)
+            REPO=$2
+            shift; shift;
+            ;;
+        --registry)
+            REGISTRY=$2
+            shift; shift;
+            ;;
+        --version)
+            VERSION=$2
+            shift; shift;
+            ;;
+        --release)
+            RELEASE=$2
+            shift; shift;
+            ;;
+        --push-latest)
+            PUSH_LATEST=1
+            shift;
+            ;;
+        --push-manifest)
+            PUSH_MANIFEST=1
+            shift;
+            ;;
+        --manifest-arches)
+            MANIFEST_ARCHES=$2
+            shift; shift;
+            ;;
+        --dockerfile)
+            DOCKERFILE=$2
+            shift; shift;
+            ;;
+        *)
+            print_usage
+            exit 1
+            ;;
+    esac
+done
+
+[ -z "$NAME" ] && print_usage && exit 1
+
+IMAGE_BASE=$REGISTRY/$REPO/$NAME
+IMAGE_TAG=$VERSION-$RELEASE
+IMAGE_TAG_ARCH=$IMAGE_TAG-$ARCH
+
+IMAGE=$IMAGE_BASE:$IMAGE_TAG_ARCH
+IMAGE_LATEST=$IMAGE_BASE:latest-$ARCH
+
+MANIFEST_LIST=$IMAGE_BASE:$IMAGE_TAG
+MANIFEST_LIST_LATEST=$IMAGE_BASE:latest
+
+echo; echo "*** Building image $IMAGE from $DOCKERFILE..."
+docker build --rm -t $IMAGE -f $DOCKERFILE .
+echo; echo "*** Pushing image $IMAGE..."
+docker push $IMAGE
+
+if [ -n "$PUSH_LATEST" ]; then
+    echo; echo "*** Tagging image $IMAGE_LATEST..."
+    docker tag $IMAGE $IMAGE_LATEST
+    echo; echo "*** Pusing image $IMAGE_LATEST..."
+    docker push $IMAGE_LATEST
+fi
+
+if [ -n "$PUSH_MANIFEST" ]; then
+    IMAGES=
+    for arch in $MANIFEST_ARCHES; do
+        IMAGES+="$MANIFEST_LIST-$arch "
+    done
+    echo; echo "*** Creating manifest list $MANIFEST_LIST ($MANIFEST_ARCHES)..."
+    docker manifest create $MANIFEST_LIST $IMAGES
+    echo; echo "*** Pushing manifest list $MANIFEST_LIST..."
+    docker manifest push $MANIFEST_LIST
+
+    if [ -n "$PUSH_LATEST" ]; then
+        echo; echo "*** Creating manifest list $MANIFEST_LIST_LATEST ($MANIFEST_ARCHES)..."
+        docker manifest create $MANIFEST_LIST_LATEST $IMAGES
+        echo; echo "*** Pushing manifest list $MANIFEST_LIST_LATEST..."
+        docker manifest push $MANIFEST_LIST_LATEST
+    fi
+fi
+

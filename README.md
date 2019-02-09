@@ -52,3 +52,13 @@ NFS_SERVER=192.168.10.1 NFS_PATH=/export/home envsubst \
 
 Replace the values of `${NFS_SERVER}` and `${NFS_PATH}` with the appropriate values for your site, and the namespace where JARVICE services are deployed if different than `jarvice-system`.  Once deployed, JARVICE will automatically leverage the service to determine user identity when possible and to attach network-mounted home directories to compute jobs.  Note that it will use the `homes` volume described in the `volumes` section of the deployment spec as the basis for compute containers mounting this storage.
 
+Example to deploy the version that uses a host-mounted home volume:
+
+```
+HOST_PATH=/mnt/home envsubst < jarvice-idmapper-hostpath.yaml \
+    | kubectl apply -n jarvice-system -f -
+```
+
+Replace the value of `${HOST_PATH}` with the appropriate location where the home volume is mounted on the host.
+
+

@@ -31,6 +31,18 @@ spec:
           requests:
             cpu: "100m"
             memory: 128Mi
+        livenessProbe:
+          httpGet:
+            path: /map/
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /map/
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 15
       volumes:
       - name: homes
         nfs:

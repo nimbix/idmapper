@@ -53,6 +53,7 @@ class idmap:
             '%D', domain.upper()).replace(
                 '%u', username if self.upnpath else parts[0])
 
+        path = path if os.path.exists(path) else path.lower()
         if os.path.exists(path):
             st = os.stat(path)
             return json.dumps(

@@ -9,6 +9,7 @@ Describes the template for how to find user home directories.  The default value
 The following substitutions are available:
 
 Substitution|Meaning
+---|---
 `%u`|user name or UPN (see below)
 `%d`|domain (or realm), if applicable
 `%D`|capitalized domain (or realm), if applicable

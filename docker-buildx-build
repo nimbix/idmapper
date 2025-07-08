@@ -10,7 +10,9 @@ PLATFORMS="linux/amd64,linux/ppc64le,linux/arm64"
 
 BUILDER=multiarch
 
-docker buildx create --name $BUILDER --use
+if ! docker buildx inspect $BUILDER > /dev/null 2>&1; then
+    docker buildx create --name $BUILDER --use
+fi
 
 export DOCKER_CLI_EXPERIMENTAL=enabled
 docker buildx build --rm \

@@ -1,5 +1,5 @@
 # idmapper
-Web service to map a username to full Linux identity based on inspection of a shared filesystem
+Web service to map a username to full Linux identity based on inspection of a shared filesystem. It also updates ownership based on a yaml file if submitted (if not, it does nothing).
 
 # Configuration (environment variables)
 

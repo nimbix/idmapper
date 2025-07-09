@@ -1,8 +1,7 @@
-FROM python:3.12-slim
+FROM python:3-alpine3.22
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    && apt-get install -y coreutils \
-    && rm -rf /var/lib/apt/lists/*
+# Install coreutils
+RUN apk add --no-cache coreutils
 
 COPY create_dirs.py /usr/local/bin/create_dirs.py
 RUN chmod +x /usr/local/bin/create_dirs.py

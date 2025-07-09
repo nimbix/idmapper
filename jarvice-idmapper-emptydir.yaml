@@ -14,6 +14,20 @@ spec:
       labels:
         app: jarvice-idmapper
     spec:
+      initContainers:
+      - name: create-dirs
+        image: nimbix/idmapper-create-dirs
+        imagePullPolicy: Always
+        env:
+        - name: BASE_PATH
+          value: "/home"
+        volumeMounts:
+        - name: homes
+          mountPath: /home
+        - name: users-config
+          mountPath: /etc/jarvice
+          readOnly: true
+          optional: true
       containers:
       - name: idmapper
         image: nimbix/idmapper
@@ -45,9 +59,14 @@ spec:
           periodSeconds: 15
       volumes:
       - name: homes
-        hostPath:
-          path: $HOST_PATH
-          type: Directory
+        emptyDir: {}
+      - name: users-config
+        configMap:
+          name: users
+          optional: true
+          items:
+            - key: users.json
+              path: users.json
       tolerations:
       - effect: NoSchedule
         key: node-role.kubernetes.io/jarvice-system
@@ -72,3 +91,21 @@ spec:
   type: ClusterIP
 status:
     loadBalancer: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-dirs
+  namespace: default  # change if needed
+data:
+  users.json: |
+    {
+      "khill": {
+        "uid": 1000,
+        "gid": 1000
+      },
+      "foo": {
+        "uid": 1001,
+        "gid": 1001
+      }
+    }

@@ -16,7 +16,7 @@ spec:
     spec:
       initContainers:
       - name: create-dirs
-        image: nimbix/idmapper-create-dirs
+        image: us-docker.pkg.dev/jarvice/images/idmapper-create-dirs:20250711
         imagePullPolicy: Always
         env:
         - name: BASE_PATH
@@ -30,7 +30,7 @@ spec:
           optional: true
       containers:
       - name: idmapper
-        image: nimbix/idmapper
+        image: us-docker.pkg.dev/jarvice/images/idmapper:20201116
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

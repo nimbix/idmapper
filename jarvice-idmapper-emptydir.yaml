@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jarvice-idmapper
+  labels:
+    app: jarvice-idmapper
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: jarvice-idmapper
+  template:
+    metadata:
+      labels:
+        app: jarvice-idmapper
+    spec:
+      initContainers:
+      - name: create-dirs
+        image: us-docker.pkg.dev/jarvice/images/idmapper-create-dirs:20250711
+        imagePullPolicy: Always
+        env:
+        - name: BASE_PATH
+          value: "/home"
+        volumeMounts:
+        - name: homes
+          mountPath: /home
+        - name: users-config
+          mountPath: /etc/jarvice
+          readOnly: true
+          optional: true
+      containers:
+      - name: idmapper
+        image: us-docker.pkg.dev/jarvice/images/idmapper:20201116
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: homes
+          mountPath: /home
+          readOnly: true
+        resources:
+          limits:
+            cpu: "100m"
+            memory: 128Mi
+          requests:
+            cpu: "100m"
+            memory: 128Mi
+        livenessProbe:
+          httpGet:
+            path: /map/
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /map/
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 15
+      volumes:
+      - name: homes
+        emptyDir: {}
+      - name: users-config
+        configMap:
+          name: users
+          optional: true
+          items:
+            - key: users.json
+              path: users.json
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/jarvice-system
+        operator: Exists
+      nodeSelector:
+        node-role.kubernetes.io/jarvice-system: ""
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: jarvice-idmapper
+  name: jarvice-idmapper
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: jarvice-idmapper
+  sessionAffinity: None
+  type: ClusterIP
+status:
+    loadBalancer: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-dirs
+  namespace: default  # change if needed
+data:
+  users.json: |
+    {
+      "khill": {
+        "uid": 1000,
+        "gid": 1000
+      },
+      "foo": {
+        "uid": 1001,
+        "gid": 1001
+      }
+    }

@@ -5,9 +5,14 @@
 REGISTRY=us-docker.pkg.dev
 REPOSITORY=jarvice/images
 IMAGE=idmapper
+CREATE_DIRS_IMAGE=idmapper-create-dirs
 PLATFORMS="linux/amd64,linux/ppc64le,linux/arm64"
 
 BUILDER=multiarch
+
+if ! docker buildx inspect $BUILDER > /dev/null 2>&1; then
+    docker buildx create --name $BUILDER --use
+fi
 
 export DOCKER_CLI_EXPERIMENTAL=enabled
 docker buildx build --rm \
@@ -16,3 +21,8 @@ docker buildx build --rm \
     -t $REGISTRY/$REPOSITORY/$IMAGE:${TAG_VERSION} \
     -f Dockerfile .
 
+docker buildx build --rm \
+    --builder $BUILDER \
+    --platform $PLATFORMS --push \
+    -t $REGISTRY/$REPOSITORY/$CREATE_DIRS_IMAGE:${TAG_VERSION} \
+    -f Dockerfile.create_dirs .

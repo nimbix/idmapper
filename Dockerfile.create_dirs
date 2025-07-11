@@ -1,0 +1,9 @@
+FROM python:3-alpine3.22
+
+# Install coreutils
+RUN apk add --no-cache coreutils
+
+COPY create_dirs.py /usr/local/bin/create_dirs.py
+RUN chmod +x /usr/local/bin/create_dirs.py
+
+ENTRYPOINT ["/usr/local/bin/create_dirs.py"]
